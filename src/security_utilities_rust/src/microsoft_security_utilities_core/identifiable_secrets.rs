@@ -110,10 +110,6 @@ pub fn try_validate_common_annotated_key(key: &str, base64_encoded_signature: &s
 }
 
 pub fn try_validate_common_annotated_key_valid_signature(key: &str) -> bool {
-    if key.is_empty() || key.trim().is_empty() {
-        return false;
-    }
-
     // A long-form has a full 4-byte checksum, while a standard form has only 3.
     let checksum_len = if key.len() == STANDARD_COMMON_ANNOTATED_KEY_SIZE {
         3
