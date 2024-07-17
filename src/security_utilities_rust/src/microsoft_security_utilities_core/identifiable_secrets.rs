@@ -95,6 +95,7 @@ pub fn is_base64_url_encoding_char(ch: char) -> bool
                    ch == '_';
 }
 
+// TODO: change return type to Result<bool, String>?
 pub fn try_validate_common_annotated_key(key: &str, base64_encoded_signature: &str) -> bool {
     if key.is_empty() || key.trim().is_empty() {
         return false;
@@ -102,6 +103,14 @@ pub fn try_validate_common_annotated_key(key: &str, base64_encoded_signature: &s
 
     if let Err(e) = validate_common_annotated_key_signature(base64_encoded_signature) {
         println!("{}", e);
+        return false;
+    }
+
+    try_validate_common_annotated_key_valid_signature(key)
+}
+
+pub fn try_validate_common_annotated_key_valid_signature(key: &str) -> bool {
+    if key.is_empty() || key.trim().is_empty() {
         return false;
     }
 
@@ -894,18 +903,8 @@ impl SecretMasker {
             let match_text = scan_match.text();
 
             if validate_checksum {
-                let match_text_as_bytes = match_text.as_bytes();
-                let mut signature_bytes = [0; 3];
-                signature_bytes[0] = match_text_as_bytes[57];
-                signature_bytes[1] = match_text_as_bytes[58];
-                signature_bytes[2] = match_text_as_bytes[59];
-
-                let signature = general_purpose::STANDARD.encode(&signature_bytes);
-
-                let checksum_validation_result = try_validate_common_annotated_key(
-                    &match_text,
-                    &signature,
-                );
+                let checksum_validation_result =
+                    try_validate_common_annotated_key_valid_signature(&match_text);
 
                 assert!(checksum_validation_result);
             }
