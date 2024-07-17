@@ -114,11 +114,11 @@ pub fn try_validate_common_annotated_key(key: &str, base64_encoded_signature: &s
 
     let long_form = key.len() == LONG_FORM_COMMON_ANNOTATED_KEY_SIZE;
 
-    let component_to_checksum = &key[..CHECKSUM_OFFSET];
-    let checksum_text = &key[CHECKSUM_OFFSET..];
+    let checksum_len = if long_form { 4 } else { 3 };
 
-    let key_bytes = general_purpose::STANDARD.decode(component_to_checksum).unwrap();
-    let input_checksum_bytes = general_purpose::STANDARD.decode(checksum_text).unwrap();
+    let component_data = general_purpose::STANDARD.decode(key).unwrap();
+    let key_bytes = &component_data[..component_data.len() - checksum_len];
+    let input_checksum_bytes = &component_data[component_data.len() - checksum_len..];
 
     let checksum = marvin::compute_hash32(&key_bytes, VERSION_TWO_CHECKSUM_SEED, 0, key_bytes.len() as i32);
 
